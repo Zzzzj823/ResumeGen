@@ -1,0 +1,68 @@
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+@media print {
+  html,
+  body,
+  #root {
+    width: 210mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .app-toolbar,
+  .editor,
+  .app-footer,
+  .preview-toolbar,
+  .preview-meta,
+  .measure,
+  .page-number,
+  .toast,
+  .storage-error,
+  .overflow-warning {
+    display: none !important;
+  }
+  .workspace,
+  .preview {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    width: 210mm;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+  }
+  .pages {
+    display: block;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+  .page-frame {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0;
+    break-after: page;
+    page-break-after: always;
+  }
+  .page-frame:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .page-frame .resume-page {
+    transform: none !important;
+    box-shadow: none;
+    margin: 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .resume-block {
+    break-inside: avoid;
+  }
+}

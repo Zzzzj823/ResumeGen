@@ -1,0 +1,122 @@
+.resume-page {
+  width: 210mm;
+  height: 297mm;
+  padding: var(--page-margin, 15mm);
+  background: white;
+  color: #191919;
+  font-family:
+    'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', 'Noto Sans SC', Arial,
+    sans-serif;
+  font-size: var(--resume-size, 10.5pt);
+  line-height: var(--resume-leading, 1.5);
+  letter-spacing: 0;
+}
+.page-content {
+  width: 100%;
+}
+.resume-block {
+  display: flow-root;
+  overflow-wrap: anywhere;
+}
+.resume-header {
+  position: relative;
+  text-align: center;
+  padding-bottom: 5mm;
+  min-height: 25mm;
+}
+.resume-header.with-photo {
+  min-height: 32mm;
+  padding-left: 28mm;
+  padding-right: 28mm;
+}
+.resume-header h1 {
+  font-size: 22pt;
+  line-height: 1.35;
+  margin: 0 0 2mm;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.contact {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 3mm;
+  font-size: 0.88em;
+  line-height: 1.6;
+}
+.contact span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.contact span + span::before {
+  content: '|';
+  color: #aaa;
+  padding-right: 3mm;
+}
+.resume-photo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 23mm;
+  height: 30mm;
+  object-fit: contain;
+}
+.resume-section-title {
+  margin: 2.8mm 0 1.6mm;
+  padding: 0 0 0.6mm;
+  border-bottom: 0.25mm solid #777;
+  font-size: 1.08em;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.resume-entry-heading {
+  padding: 1mm 0 0.5mm;
+}
+.entry-title-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 3mm;
+}
+.entry-title-line strong {
+  min-width: 0;
+  flex: 1;
+}
+.entry-date {
+  flex: 0 1 auto;
+  max-width: 43%;
+  text-align: right;
+  font-size: 0.9em;
+  color: #444;
+}
+.entry-subtitle {
+  font-size: 0.94em;
+  color: #414141;
+}
+.resume-paragraph {
+  display: flex;
+  gap: 1.5mm;
+  padding-bottom: 0.55mm;
+}
+.resume-paragraph > span:last-child {
+  flex: 1;
+  min-width: 0;
+  white-space: pre-wrap;
+}
+.bullet {
+  flex: 0 0 2mm;
+  text-align: center;
+}
+.continuation-heading {
+  color: #555;
+  font-size: 0.9em;
+  padding-bottom: 3mm;
+}
+.measure {
+  position: fixed;
+  left: -100000px;
+  top: 0;
+  height: auto;
+  visibility: hidden;
+  pointer-events: none;
+}

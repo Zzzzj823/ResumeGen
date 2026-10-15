@@ -1,0 +1,13 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+*.tsbuildinfo
+*.log
+.DS_Store
+.env*
+!.env.example
+.npm-lock-tmp/
+.pnpm-store/
+.vscode/settings.json
+references/resume-reference.png
