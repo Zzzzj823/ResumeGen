@@ -12,6 +12,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      pages_artifact: ${{ steps.pages-artifact-name.outputs.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,13 +46,20 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-reports
+          name: test-reports-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             playwright-report
             test-results
+      # Preserve the build's name for deploy-only retries, whose run_attempt changes.
+      - name: Choose unique Pages artifact name
+        id: pages-artifact-name
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: echo "name=github-pages-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
+          name: ${{ steps.pages-artifact-name.outputs.name }}
           path: dist
   deploy:
     if: github.event_name != 'pull_request'
@@ -66,3 +75,5 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ needs.build.outputs.pages_artifact }}
