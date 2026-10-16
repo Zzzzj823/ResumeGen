@@ -1,9 +1,38 @@
 import { test, expect, type Page } from '@playwright/test';
-import { getDocument, OPS } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import {
+  getDocument,
+  OPS,
+  type PDFPageProxy,
+} from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { example } from '../../src/data/example';
 
 async function ready(page: Page) {
   await expect(page.locator('.pages')).toHaveAttribute('data-ready', 'true');
+}
+
+async function pdfText(page: PDFPageProxy) {
+  const content = await page.getTextContent();
+  const viewport = page.getViewport({ scale: 1 });
+  for (const item of content.items) {
+    if (!('str' in item) || !item.str.trim()) continue;
+    // These PDFs contain horizontal text. Check the actual PDF coordinates,
+    // since extractable text alone does not prove that it is inside the page.
+    const [x, baseline] = viewport.convertToViewportPoint(
+      item.transform[4],
+      item.transform[5],
+    );
+    expect(x).toBeGreaterThanOrEqual(-1);
+    expect(x + item.width).toBeLessThanOrEqual(viewport.width + 1);
+    expect(baseline - item.height).toBeGreaterThanOrEqual(-1);
+    expect(baseline).toBeLessThanOrEqual(viewport.height + 1);
+  }
+  // CJK fonts can map shared glyphs to compatibility radicals (⼯/工,
+  // ⼀/一, ⾏/行). PDF.js 4's normalization does not cover those radicals.
+  // Normalize extracted text only; keep exact content and page-count checks.
+  return content.items
+    .map((item) => ('str' in item ? item.str : ''))
+    .join('')
+    .normalize('NFKC');
 }
 async function assertBounds(page: Page) {
   const bounds = await page
@@ -67,8 +96,7 @@ test('default A4, real-time editing, persistence, JSON and PDF', async ({
   const viewport = first.getViewport({ scale: 1 });
   expect(viewport.width).toBeCloseTo(595.28, 0);
   expect(viewport.height).toBeCloseTo(841.89, 0);
-  const content = await first.getTextContent();
-  const text = content.items.map((i) => ('str' in i ? i.str : '')).join('');
+  const text = await pdfText(first);
   expect(text).toContain('测试工程师');
   expect(text).toContain('教育经历');
   expect(text).not.toContain('简历工作台');
@@ -96,6 +124,12 @@ test('multi-page long paragraphs, photo, special characters and large typography
   expect(count).toBeGreaterThan(2);
   await assertBounds(page);
   await expect(page.locator('.pages')).toContainText(sentinel);
+  await expect(page.locator('.pages .resume-page').last()).toContainText(
+    sentinel,
+  );
+  await page.emulateMedia({ media: 'print' });
+  await ready(page);
+  await assertBounds(page);
   const bytes = await page.pdf({
     path: info.outputPath('long-resume.pdf'),
     preferCSSPageSize: true,
@@ -106,16 +140,20 @@ test('multi-page long paragraphs, photo, special characters and large typography
     useSystemFonts: true,
   }).promise;
   expect(pdf.numPages).toBe(count);
-  let text = '';
+  const pageTexts: string[] = [];
   for (let i = 1; i <= pdf.numPages; i++) {
-    const content = await (await pdf.getPage(i)).getTextContent();
-    text += content.items
-      .map((item) => ('str' in item ? item.str : ''))
-      .join('');
+    pageTexts.push(await pdfText(await pdf.getPage(i)));
   }
+  const text = pageTexts.join('');
   expect(text).toContain(sentinel);
+  expect(pageTexts.at(-1)).toContain(sentinel);
+  expect(text.split(sentinel)).toHaveLength(2);
   expect(text.match(/Unicode/g)?.length).toBe(180);
+  expect(text.match(/中文/g)?.length).toBe(180);
+  expect(text.match(/<HTML>/g)?.length).toBe(180);
+  expect(text.match(/★。/g)?.length).toBe(180);
   await pdf.destroy();
+  await page.emulateMedia({ media: 'screen' });
   await page.screenshot({ path: info.outputPath('multipage.png') });
 });
 test('module ordering, visibility, photo and mobile layout', async ({
